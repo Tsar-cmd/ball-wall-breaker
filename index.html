@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Гонка шариков</title>
-<link rel="stylesheet" href="styles.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Гонка шариков</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="wrap">
@@ -55,36 +55,24 @@
         <span class="muted">(нажмите, чтобы заполнить поля выше)</span>
       </div>
       <div class="divider"></div>
+      <div class="tabs">
+        <button class="tab active" id="tabNormal" data-cat="normal">Обычные</button>
+        <button class="tab" id="tabHybrids" data-cat="hybrids">Гибриды</button>
+      </div>
       <div class="two-col">
         <div class="field">
           <label>Левая коробка — тип шарика</label>
-          <select id="typeLeftSel">
-            <option value="strong">Сильный (коричневый)</option>
-            <option value="fast">Быстрый (красный)</option>
-            <option value="growing">Растущий (жёлтый)</option>
-            <option value="laser">Лазерный (зелёный)</option>
-            <option value="gravitron">Гравитрон (фиолетовый)</option>
-            <option value="duplicator">Дупликатор (розовый)</option>
-            <option value="hybrid">Гибрид (сильный+быстрый)</option>
-          </select>
+          <select id="typeLeftSel"></select>
         </div>
         <div class="field">
           <label>Правая коробка — тип шарика</label>
-          <select id="typeRightSel">
-            <option value="strong">Сильный (коричневый)</option>
-            <option value="fast">Быстрый (красный)</option>
-            <option value="growing">Растущий (жёлтый)</option>
-            <option value="laser">Лазерный (зелёный)</option>
-            <option value="gravitron">Гравитрон (фиолетовый)</option>
-            <option value="duplicator">Дупликатор (розовый)</option>
-            <option value="hybrid">Гибрид (сильный+быстрый)</option>
-          </select>
+          <select id="typeRightSel"></select>
         </div>
       </div>
       <div class="row" style="justify-content:flex-end"><button id="applyStart">Начать игру</button></div>
     </div>
   </div>
 
-<script src="script.js" defer></script>
+  <script src="script.js" defer></script>
 </body>
 </html>
