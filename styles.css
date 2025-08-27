@@ -1,0 +1,52 @@
+:root { --lane-w:420px; --lane-h:560px }
+    *{ box-sizing:border-box }
+    html,body{ height:100% }
+    body{ margin:0; background:#f5f7fb; font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; display:flex; align-items:center; justify-content:center }
+    .wrap{ display:flex; flex-direction:column; gap:14px; align-items:center; padding:18px }
+    .controls{ display:flex; gap:10px; align-items:center; justify-content:center }
+    button{ cursor:pointer; font-weight:700; border:2px solid #000; background:#fff; color:#000; border-radius:10px; padding:10px 14px }
+    button:active{ transform:translateY(1px) }
+    .lanes{ display:flex; gap:28px; align-items:flex-start; justify-content:center; flex-wrap:wrap }
+    canvas{ width:var(--lane-w); height:var(--lane-h); background:#fff; display:block; border:3px solid #000; border-radius:6px }
+    .winner{ font-size:18px; font-weight:800 }
+    .hint{ font-size:13px; opacity:.8 }
+    .modal{ position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center }
+    .card{ background:#fff; border:3px solid #000; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.35); padding:16px; max-width:700px; width:calc(100% - 24px) }
+    .card h3{ margin:0 0 8px 0; font-size:22px; font-weight:900 }
+    .grid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px }
+    .grid label{ font-size:12px; font-weight:700 }
+    .row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:8px 0 }
+    .divider{ height:1px; background:#000; opacity:.1; margin:10px 0 }
+    input[type=number]{ width:100%; padding:8px; border:2px solid #000; border-radius:8px; font-weight:800; text-align:center }
+    select{ width:100%; padding:8px 10px; border:2px solid #000; border-radius:8px; font-weight:800; background:#fff; color:#000 }
+    .preset{ display:flex; gap:8px; flex-wrap:wrap }
+    .chip{ border:2px solid #000; border-radius:999px; padding:6px 10px; background:#fff; font-weight:700; cursor:pointer }
+    .muted{ font-size:12px; opacity:.8 }
+    .hidden{ display:none }
+    .two-col{ display:grid; grid-template-columns:1fr 1fr; gap:10px; width:100% }
+    .field label{ font-size:12px; font-weight:700; display:block; margin-bottom:4px }
+    .lane{ display:flex; flex-direction:column; align-items:center }
+    .hud{ background:#fff; border:2px solid #000; border-radius:10px; padding:6px 10px; font-weight:800; margin-bottom:6px; min-width:120px; text-align:center }
+    .tabs{ display:flex; gap:8px; margin:6px 0 2px }
+    .tab{ border:2px solid #000; border-radius:999px; padding:6px 12px; background:#fff; font-weight:800; cursor:pointer }
+    .tab.active{ background:#000; color:#fff }
+
+    @media (max-width: 900px) {
+      :root{ --lane-w:360px; --lane-h:520px }
+      .lanes{ gap:18px }
+      .card{ width:min(100% - 16px, 560px) }
+    }
+    @media (max-width: 480px) {
+      :root{ --lane-w:300px; --lane-h:460px }
+      body{ align-items:flex-start }
+      .wrap{ padding:10px 6px }
+      .controls{ gap:8px; flex-wrap:wrap }
+      button{ padding:9px 12px; border-radius:12px }
+      .lanes{ flex-direction:column; gap:12px }
+      .winner{ font-size:16px }
+      .hud{ min-width:auto; font-size:12px }
+      .grid{ grid-template-columns:1fr }
+      .two-col{ grid-template-columns:1fr }
+      .card{ width:calc(100% - 12px) }
+      canvas{ border-width:2px; border-radius:8px }
+    }
