@@ -23,6 +23,18 @@
     var tabNormal=document.getElementById('tabNormal');
     var tabHybrids=document.getElementById('tabHybrids');
     var repopulating=false;
+    var FibonacciDamageHelper=(typeof window!=='undefined'&&window.FibonacciDamage)?window.FibonacciDamage:(typeof globalThis!=='undefined'&&globalThis.FibonacciDamage?globalThis.FibonacciDamage:{
+      initial:function(){ return { prev:0, current:1 }; },
+      next:function(prev,current){
+        var prevSafe=Number(prev);
+        if(!isFinite(prevSafe)){ prevSafe=0; }
+        var currentSafe=Number(current);
+        if(!isFinite(currentSafe)||currentSafe<=0){ currentSafe=1; }
+        var nextValue=prevSafe+currentSafe;
+        if(!isFinite(nextValue)||nextValue<=0){ nextValue=1; }
+        return { prev:currentSafe, next:nextValue };
+      }
+    });
 
     function hexToRgb(h){ h=String(h||'').replace('#',''); if(h.length===3){ h=h.split('').map(function(c){return c+c}).join('') } var n=parseInt(h,16); if(!isFinite(n)) n=0xFFFFFF; return { r:(n>>16)&255, g:(n>>8)&255, b:n&255 } }
     function rgbToCss(c){ return 'rgb('+Math.round(c.r)+','+Math.round(c.g)+','+Math.round(c.b)+')' }
@@ -39,6 +51,7 @@
       if(ball&&ball.type==='gravistrong'){ return mixRGB(hexToRgb('#9b59b6'),hexToRgb('#8b5a2b'),0.5) }
       if(ball&&ball.type==='gravilaser'){ return mixRGB(hexToRgb('#9b59b6'),hexToRgb('#1abc9c'),0.5) }
       if(ball&&ball.type==='stickdupe'){ return mixRGB(hexToRgb('#00cfe8'),hexToRgb('#ff66cc'),0.5) }
+      if(ball&&ball.type==='fibonacci'){ return hexToRgb('#2ecc71') }
       return hexToRgb(ball&&ball.color?ball.color:'#000')
     }
 
@@ -54,12 +67,14 @@
       gravistrong:{kind:'gravistrong'},
       gravilaser:{kind:'gravilaser'},
       stickdupe:{kind:'stickdupe'},
-      sticky:{color:'#00cfe8',kind:'sticky'}
+      sticky:{color:'#00cfe8',kind:'sticky'},
+      fibonacci:{color:'#2ecc71',kind:'fibonacci'}
     };
 
     var NORMAL_TYPES=[
       {value:'strong',label:'Сильный (коричневый)'},
       {value:'fast',label:'Быстрый (красный)'},
+      {value:'fibonacci',label:'Фибоначчи (зелёный)'},
       {value:'growing',label:'Растущий (жёлтый)'},
       {value:'laser',label:'Лазерный (зелёный)'},
       {value:'gravitron',label:'Гравитрон (фиолетовый)'},
@@ -99,6 +114,12 @@
       if(type==='gravistrong'){ b.color='#8b5a2b'; b.g=0.42; b.gIncPS=0.08; b.gK=0.08; b.gBounceInc=0.02; b.damage=1 }
       if(type==='gravilaser'){ b.color='#1abc9c'; b.laserAngle=-Math.PI/2; b.laserAngVel=1.5; b.laserTimer=0; b.laserInterval=0.25; b.laserDamage=1; b.laserHits=0; b.lastLaserBlockIdx=-1; b.laserTierHits=0; b.g=0.42; b.gIncPS=0.08; b.gK=0.08; b.gBounceInc=0.02 }
       if(type==='stickdupe'){ b.color='#00cfe8'; b.g=0.5; b.stickInterval=0.05; b.stickHitsTarget=1; b.stickHitsDone=0; b.sticking=false; b.stickBlockIdx=-1; b.stickTimer=0; b.stickKeepVX=b.vx; b.dupEvery=5; b.dupTimer=0 }
+      if(type==='fibonacci'){
+        var fibInit=FibonacciDamageHelper.initial();
+        b.color='#2ecc71';
+        b.fibPrev=fibInit.prev;
+        b.damage=fibInit.current;
+      }
       return b;
     }
 
@@ -165,7 +186,29 @@
 
     document.addEventListener('keydown',function(e){ if(e.code==='Space'){ e.preventDefault(); if(!isRunning&&winner===null){ start() } else if(winner!==null){ restart() } } });
 
-    function bounce(b){ if(b.type==='strong'||b.type==='gravistrong'){ return 6.8 } var base=6.5, k=0.25; return base+k*Math.abs(b.vx) }
+    var STRONG_BOUNCE=6.8;
+    var MATCH_STRONG_BOUNCE={
+      strong:true,
+      gravistrong:true,
+      fast:true,
+      hybrid:true,
+      fibonacci:true,
+      growing:true,
+      laser:true,
+      gravitron:true,
+      duplicator:true,
+      growdupe:true,
+      gravilaser:true,
+      stickdupe:true,
+      sticky:true
+    };
+
+    function bounce(b){
+      if(!b) return STRONG_BOUNCE;
+      if(MATCH_STRONG_BOUNCE[b.type]){ return STRONG_BOUNCE }
+      var base=6.5, k=0.25;
+      return base+k*Math.abs(b.vx||0);
+    }
     function firstAlive(L){ if(!L||!L.blocks) return -1; for(var i=0;i<L.blocks.length;i++){ if(!L.blocks[i].broken){ return i } } return -1 }
     function surface(L){ var i=firstAlive(L); if(i>=0){ return {y:L.blocks[i].y, idx:i} } return { y:laneH-FINISH_H-BORDER, idx:-1 } }
 
@@ -225,8 +268,22 @@
               if(s.idx>=0){
                 var block=L.blocks[s.idx];
                 if(!block.broken){
-                  var dmg=(b.type==='strong'||b.type==='hybrid'||b.type==='gravistrong')?(b.damage||1):1; block.hp=Math.max(0,block.hp-dmg);
-                  if(b.type==='strong'||b.type==='hybrid'||b.type==='gravistrong'){ b.damage=(b.damage||1)+1 }
+                  var dmg;
+                  if(b.type==='strong'||b.type==='hybrid'||b.type==='gravistrong'){
+                    dmg=(b.damage||1);
+                  } else if(b.type==='fibonacci'){
+                    dmg=(b.damage||1);
+                  } else {
+                    dmg=1;
+                  }
+                  block.hp=Math.max(0,block.hp-dmg);
+                  if(b.type==='strong'||b.type==='hybrid'||b.type==='gravistrong'){
+                    b.damage=(b.damage||1)+1;
+                  } else if(b.type==='fibonacci'){
+                    var fibStep=FibonacciDamageHelper.next(b.fibPrev,b.damage);
+                    b.fibPrev=fibStep.prev;
+                    b.damage=fibStep.next;
+                  }
                   if(b.type==='sticky'||b.type==='stickdupe'){
                     b.sticking=true; b.stickBlockIdx=s.idx; b.stickTimer=0; b.stickHitsDone=0;
                     b.stickKeepVX=b.vx; b.stickY=s.y-b.r; b.vx=0; b.vy=0;
@@ -263,7 +320,7 @@
     function fmtInterval(b){ var t=(b&&b.laserInterval)||0; if(t<=0) return '0'; if(t.toFixed(4)==='0.0000'){ var e=Math.floor(Math.log10(t)); var m=(t/Math.pow(10,e)).toFixed(2); return m+'*10^'+e } return t.toFixed(3) }
 
     function refreshHUD(){
-      function textForLane(L){ if(!L||!L.balls||L.balls.length===0) return '—'; var alive=L.balls.filter(function(x){return !x.popped}); var b=alive[0]||L.balls[0]; if(b.type==='fast') return 'Скорость: '+Math.abs(b.vx).toFixed(2); if(b.type==='hybrid') return 'Урон: '+(b.damage||1)+' | Скорость: '+Math.abs(b.vx).toFixed(2); if(b.type==='growdupe') return 'Радиус: '+b.r.toFixed(1)+' | Клонов: '+alive.length; if(b.type==='growing') return 'Радиус: '+b.r.toFixed(1); if(b.type==='laser') return 'Лазер: '+(b.laserDamage||1).toFixed(2)+' | t '+fmtInterval(b); if(b.type==='gravilaser') return 'Гравитация: '+(b.g||0).toFixed(2)+' | t '+fmtInterval(b); if(b.type==='gravitron') return 'Гравитация: '+(b.g||0).toFixed(2); if(b.type==='gravistrong') return 'Гравитация: '+(b.g||0).toFixed(2)+' | Урон: '+(b.damage||1); if(b.type==='duplicator') return 'Клонов: '+alive.length; if(b.type==='sticky') return 'Прилип: '+(b.stickHitsTarget||1); if(b.type==='stickdupe') return 'Прилип: '+(b.stickHitsTarget||1)+' | Клонов: '+alive.length; return 'Урон: '+(b.damage||1) }
+      function textForLane(L){ if(!L||!L.balls||L.balls.length===0) return '—'; var alive=L.balls.filter(function(x){return !x.popped}); var b=alive[0]||L.balls[0]; if(b.type==='fast') return 'Скорость: '+Math.abs(b.vx).toFixed(2); if(b.type==='hybrid') return 'Урон: '+(b.damage||1)+' | Скорость: '+Math.abs(b.vx).toFixed(2); if(b.type==='fibonacci'){ var prev=typeof b.fibPrev==='number'?b.fibPrev:0; return 'Урон: '+(b.damage||1)+' | Пред: '+prev; } if(b.type==='growdupe') return 'Радиус: '+b.r.toFixed(1)+' | Клонов: '+alive.length; if(b.type==='growing') return 'Радиус: '+b.r.toFixed(1); if(b.type==='laser') return 'Лазер: '+(b.laserDamage||1).toFixed(2)+' | t '+fmtInterval(b); if(b.type==='gravilaser') return 'Гравитация: '+(b.g||0).toFixed(2)+' | t '+fmtInterval(b); if(b.type==='gravitron') return 'Гравитация: '+(b.g||0).toFixed(2); if(b.type==='gravistrong') return 'Гравитация: '+(b.g||0).toFixed(2)+' | Урон: '+(b.damage||1); if(b.type==='duplicator') return 'Клонов: '+alive.length; if(b.type==='sticky') return 'Прилип: '+(b.stickHitsTarget||1); if(b.type==='stickdupe') return 'Прилип: '+(b.stickHitsTarget||1)+' | Клонов: '+alive.length; return 'Урон: '+(b.damage||1) }
       if(hudLeft) hudLeft.textContent=textForLane(lanes[0]); if(hudRight) hudRight.textContent=textForLane(lanes[1]);
     }
 
