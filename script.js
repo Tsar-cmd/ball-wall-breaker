@@ -23,6 +23,18 @@
     var tabNormal=document.getElementById('tabNormal');
     var tabHybrids=document.getElementById('tabHybrids');
     var repopulating=false;
+    var FibonacciDamageHelper=(typeof window!=='undefined'&&window.FibonacciDamage)?window.FibonacciDamage:(typeof globalThis!=='undefined'&&globalThis.FibonacciDamage?globalThis.FibonacciDamage:{
+      initial:function(){ return { prev:0, current:1 }; },
+      next:function(prev,current){
+        var prevSafe=Number(prev);
+        if(!isFinite(prevSafe)){ prevSafe=0; }
+        var currentSafe=Number(current);
+        if(!isFinite(currentSafe)||currentSafe<=0){ currentSafe=1; }
+        var nextValue=prevSafe+currentSafe;
+        if(!isFinite(nextValue)||nextValue<=0){ nextValue=1; }
+        return { prev:currentSafe, next:nextValue };
+      }
+    });
 
     function hexToRgb(h){ h=String(h||'').replace('#',''); if(h.length===3){ h=h.split('').map(function(c){return c+c}).join('') } var n=parseInt(h,16); if(!isFinite(n)) n=0xFFFFFF; return { r:(n>>16)&255, g:(n>>8)&255, b:n&255 } }
     function rgbToCss(c){ return 'rgb('+Math.round(c.r)+','+Math.round(c.g)+','+Math.round(c.b)+')' }
@@ -102,7 +114,12 @@
       if(type==='gravistrong'){ b.color='#8b5a2b'; b.g=0.42; b.gIncPS=0.08; b.gK=0.08; b.gBounceInc=0.02; b.damage=1 }
       if(type==='gravilaser'){ b.color='#1abc9c'; b.laserAngle=-Math.PI/2; b.laserAngVel=1.5; b.laserTimer=0; b.laserInterval=0.25; b.laserDamage=1; b.laserHits=0; b.lastLaserBlockIdx=-1; b.laserTierHits=0; b.g=0.42; b.gIncPS=0.08; b.gK=0.08; b.gBounceInc=0.02 }
       if(type==='stickdupe'){ b.color='#00cfe8'; b.g=0.5; b.stickInterval=0.05; b.stickHitsTarget=1; b.stickHitsDone=0; b.sticking=false; b.stickBlockIdx=-1; b.stickTimer=0; b.stickKeepVX=b.vx; b.dupEvery=5; b.dupTimer=0 }
-      if(type==='fibonacci'){ b.color='#2ecc71'; b.fibPrev=0; b.damage=1 }
+      if(type==='fibonacci'){
+        var fibInit=FibonacciDamageHelper.initial();
+        b.color='#2ecc71';
+        b.fibPrev=fibInit.prev;
+        b.damage=fibInit.current;
+      }
       return b;
     }
 
@@ -241,11 +258,9 @@
                   if(b.type==='strong'||b.type==='hybrid'||b.type==='gravistrong'){
                     b.damage=(b.damage||1)+1;
                   } else if(b.type==='fibonacci'){
-                    var prev=typeof b.fibPrev==='number'?b.fibPrev:0;
-                    var current=(b.damage||1);
-                    var next=prev+current;
-                    b.fibPrev=current;
-                    b.damage=next>0?next:1;
+                    var fibStep=FibonacciDamageHelper.next(b.fibPrev,b.damage);
+                    b.fibPrev=fibStep.prev;
+                    b.damage=fibStep.next;
                   }
                   if(b.type==='sticky'||b.type==='stickdupe'){
                     b.sticking=true; b.stickBlockIdx=s.idx; b.stickTimer=0; b.stickHitsDone=0;
