@@ -293,7 +293,7 @@
                     b.sticking=true; b.stickBlockIdx=s.idx; b.stickTimer=0; b.stickHitsDone=0;
                     b.stickKeepVX=b.vx; b.stickY=s.y-b.r; b.vx=0; b.vy=0;
                   } else {
-                    if(b.type==='fast'||b.type==='hybrid'){ b.vy=-Math.max(bounce(b),(b.spd||Math.abs(b.vx))) } else { b.vy=-bounce(b) }
+                    b.vy=-bounce(b);
                   }
                   if(b.type==='laser'||b.type==='gravilaser'){
                     var thr=0.01; var liInt=b.laserInterval||0.25;
