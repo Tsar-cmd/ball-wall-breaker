@@ -187,6 +187,11 @@
     document.addEventListener('keydown',function(e){ if(e.code==='Space'){ e.preventDefault(); if(!isRunning&&winner===null){ start() } else if(winner!==null){ restart() } } });
 
     var STRONG_BOUNCE=6.8;
+codex-qajpup
+    var STRONG_BASE_G=0.45;
+    var STRONG_TARGET_HEIGHT=(STRONG_BOUNCE*STRONG_BOUNCE)/(2*STRONG_BASE_G);
+=======
+main
     var MATCH_STRONG_BOUNCE={
       strong:true,
       gravistrong:true,
@@ -205,7 +210,14 @@
 
     function bounce(b){
       if(!b) return STRONG_BOUNCE;
+codex-qajpup
+      if(MATCH_STRONG_BOUNCE[b.type]){
+        var g=(typeof b.g==='number'&&b.g>0)?b.g:STRONG_BASE_G;
+        return Math.sqrt(Math.max(0,2*g*STRONG_TARGET_HEIGHT));
+      }
+=======
       if(MATCH_STRONG_BOUNCE[b.type]){ return STRONG_BOUNCE }
+main
       var base=6.5, k=0.25;
       return base+k*Math.abs(b.vx||0);
     }
@@ -288,7 +300,7 @@
                     b.sticking=true; b.stickBlockIdx=s.idx; b.stickTimer=0; b.stickHitsDone=0;
                     b.stickKeepVX=b.vx; b.stickY=s.y-b.r; b.vx=0; b.vy=0;
                   } else {
-                    if(b.type==='fast'||b.type==='hybrid'){ b.vy=-Math.max(bounce(b),(b.spd||Math.abs(b.vx))) } else { b.vy=-bounce(b) }
+                    b.vy=-bounce(b);
                   }
                   if(b.type==='laser'||b.type==='gravilaser'){
                     var thr=0.01; var liInt=b.laserInterval||0.25;
