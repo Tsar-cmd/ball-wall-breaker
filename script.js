@@ -187,8 +187,11 @@
     document.addEventListener('keydown',function(e){ if(e.code==='Space'){ e.preventDefault(); if(!isRunning&&winner===null){ start() } else if(winner!==null){ restart() } } });
 
     var STRONG_BOUNCE=6.8;
+codex-qajpup
     var STRONG_BASE_G=0.45;
     var STRONG_TARGET_HEIGHT=(STRONG_BOUNCE*STRONG_BOUNCE)/(2*STRONG_BASE_G);
+=======
+main
     var MATCH_STRONG_BOUNCE={
       strong:true,
       gravistrong:true,
@@ -207,10 +210,14 @@
 
     function bounce(b){
       if(!b) return STRONG_BOUNCE;
+codex-qajpup
       if(MATCH_STRONG_BOUNCE[b.type]){
         var g=(typeof b.g==='number'&&b.g>0)?b.g:STRONG_BASE_G;
         return Math.sqrt(Math.max(0,2*g*STRONG_TARGET_HEIGHT));
       }
+=======
+      if(MATCH_STRONG_BOUNCE[b.type]){ return STRONG_BOUNCE }
+main
       var base=6.5, k=0.25;
       return base+k*Math.abs(b.vx||0);
     }
