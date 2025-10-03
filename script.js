@@ -186,7 +186,29 @@
 
     document.addEventListener('keydown',function(e){ if(e.code==='Space'){ e.preventDefault(); if(!isRunning&&winner===null){ start() } else if(winner!==null){ restart() } } });
 
-    function bounce(b){ if(b.type==='strong'||b.type==='gravistrong'){ return 6.8 } var base=6.5, k=0.25; return base+k*Math.abs(b.vx) }
+    var STRONG_BOUNCE=6.8;
+    var MATCH_STRONG_BOUNCE={
+      strong:true,
+      gravistrong:true,
+      fast:true,
+      hybrid:true,
+      fibonacci:true,
+      growing:true,
+      laser:true,
+      gravitron:true,
+      duplicator:true,
+      growdupe:true,
+      gravilaser:true,
+      stickdupe:true,
+      sticky:true
+    };
+
+    function bounce(b){
+      if(!b) return STRONG_BOUNCE;
+      if(MATCH_STRONG_BOUNCE[b.type]){ return STRONG_BOUNCE }
+      var base=6.5, k=0.25;
+      return base+k*Math.abs(b.vx||0);
+    }
     function firstAlive(L){ if(!L||!L.blocks) return -1; for(var i=0;i<L.blocks.length;i++){ if(!L.blocks[i].broken){ return i } } return -1 }
     function surface(L){ var i=firstAlive(L); if(i>=0){ return {y:L.blocks[i].y, idx:i} } return { y:laneH-FINISH_H-BORDER, idx:-1 } }
 
