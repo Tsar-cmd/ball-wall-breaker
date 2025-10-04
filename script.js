@@ -214,6 +214,7 @@
       sticky: true
     };
 
+ codex-0ep4rn
     function bounce(b) {
       if (!b) return STRONG_BOUNCE;
       if (MATCH_STRONG_BOUNCE[b.type]) {
@@ -223,6 +224,53 @@
       var base = 6.5;
       var k = 0.25;
       return base + k * Math.abs(b.vx || 0);
+=======
+    var STRONG_BOUNCE=6.8;
+ codex-te2faa
+    var STRONG_BASE_G=0.45;
+    var STRONG_TARGET_HEIGHT=(STRONG_BOUNCE*STRONG_BOUNCE)/(2*STRONG_BASE_G);
+=======
+codex-qajpup
+    var STRONG_BASE_G=0.45;
+    var STRONG_TARGET_HEIGHT=(STRONG_BOUNCE*STRONG_BOUNCE)/(2*STRONG_BASE_G);
+=======
+main
+ main
+    var MATCH_STRONG_BOUNCE={
+      strong:true,
+      gravistrong:true,
+      fast:true,
+      hybrid:true,
+      fibonacci:true,
+      growing:true,
+      laser:true,
+      gravitron:true,
+      duplicator:true,
+      growdupe:true,
+      gravilaser:true,
+      stickdupe:true,
+      sticky:true
+    };
+
+    function bounce(b){
+      if(!b) return STRONG_BOUNCE;
+ codex-te2faa
+=======
+codex-qajpup
+ main
+      if(MATCH_STRONG_BOUNCE[b.type]){
+        var g=(typeof b.g==='number'&&b.g>0)?b.g:STRONG_BASE_G;
+        return Math.sqrt(Math.max(0,2*g*STRONG_TARGET_HEIGHT));
+      }
+ codex-te2faa
+=======
+=======
+      if(MATCH_STRONG_BOUNCE[b.type]){ return STRONG_BOUNCE }
+main
+ main
+      var base=6.5, k=0.25;
+      return base+k*Math.abs(b.vx||0);
+ main
     }
     function firstAlive(L){ if(!L||!L.blocks) return -1; for(var i=0;i<L.blocks.length;i++){ if(!L.blocks[i].broken){ return i } } return -1 }
     function surface(L){ var i=firstAlive(L); if(i>=0){ return {y:L.blocks[i].y, idx:i} } return { y:laneH-FINISH_H-BORDER, idx:-1 } }
